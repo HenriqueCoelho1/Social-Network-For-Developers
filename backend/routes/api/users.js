@@ -2,6 +2,9 @@ const express = require('express')
 const router = express.Router()
 const gravatar = require('gravatar')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+require('dotenv').config() //.env para o ENV.PROCESS
+const secret = process.env.JWT_SECRET
 const { check, validationResult } = require('express-validator')
 
 const User = require('../../models/User')
@@ -13,7 +16,7 @@ router.post('/', [
     check('name', 'name is required')
         .not()
         .isEmpty(),
-    check('email', 'Please include  valid email').isEmail(),
+    check('email', 'Please include a valid email').isEmail(),
     check('password', 'Please enter a password with 6 or more characters').isLength({ min: 6 }),
 ], async (req, res) => {
     const errors = validationResult(req)
@@ -27,7 +30,9 @@ router.post('/', [
         //See if user exists
         let user = await User.findOne({ email: email })
         if (user) {
-            res.status(400).json({ errors: [{ msg: 'User already exists' }] })
+            return res
+                .status(400)
+                .json({ errors: [{ msg: 'User already exists' }] })
         }
 
         //Get users gravatar
@@ -52,7 +57,19 @@ router.post('/', [
         await user.save()
 
         //Return jsonwebtoken
-        res.send('User registered')
+        const payload = {
+            user: {
+                id: user.id,
+
+            }
+        }
+
+        jwt.sign(payload, secret,
+            { expiresIn: 360000 },
+            (err, token) => {
+                if (err) throw err
+                res.json({ token })
+            })
 
     } catch (err) {
         console.error(err.message)
