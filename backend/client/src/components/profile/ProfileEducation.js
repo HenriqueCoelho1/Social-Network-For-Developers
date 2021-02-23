@@ -34,7 +34,7 @@ const ProfileEducation = ({ education: {
 }
 
 ProfileEducation.propTypes = {
-    experience: PropTypes.array.isRequired,
+    education: PropTypes.array.isRequired,
 
 }
 
