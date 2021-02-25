@@ -62,14 +62,19 @@ export default function (state = initialState, action) {
         case ADD_COMMENT:
             return {
                 ...state,
-                post: { ...state.post, payload },
+                post: { ...state.post, comments: payload },
                 loading: false
 
             }
         case REMOVE_COMMENT:
             return {
-                ...state.post,
-                comments: state.post.comments.filter(comment => comment._id !== payload),
+                ...state,
+                post: {
+                    ...state.post,
+                    comments: state.post.comments.filter(comment => comment._id !== payload)
+                    //Bring all the comments from the server 
+                    //except with that id because that one was deleted by the server
+                },
                 loading: false
             }
         default:
